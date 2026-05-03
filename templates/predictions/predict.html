@@ -1,0 +1,632 @@
+{% extends "base.html" %}
+{% block title %}NEET College Predictor{% if results %} — Results{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .hero { background:linear-gradient(135deg,var(--navy) 0%,var(--navy-soft) 100%); padding:3.5rem 2rem 2.5rem; text-align:center; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 50% at 20% 50%,rgba(245,158,11,.08) 0%,transparent 70%),radial-gradient(ellipse 50% 40% at 80% 50%,rgba(124,58,237,.08) 0%,transparent 70%); pointer-events:none; }
+  .hero-eyebrow { display:inline-block; background:rgba(245,158,11,.15); border:1px solid rgba(245,158,11,.3); color:var(--amber-lt); font-size:.72rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase; padding:.3rem .9rem; border-radius:100px; margin-bottom:1rem; }
+  .hero h1 { font-family:var(--font-d); font-size:clamp(1.7rem,4vw,2.8rem); font-weight:800; color:#fff; line-height:1.15; margin-bottom:.6rem; }
+  .hero h1 span { color:var(--amber); }
+  .hero p { color:rgba(255,255,255,.6); font-size:.95rem; max-width:520px; margin:0 auto; }
+  .hero .stats-bar { display:flex; justify-content:center; gap:2rem; margin-top:1.25rem; }
+  .hero .stat { text-align:center; }
+  .hero .stat-val { font-family:var(--font-d); font-weight:800; font-size:1.3rem; color:var(--amber); }
+  .hero .stat-lbl { font-size:.7rem; color:rgba(255,255,255,.45); text-transform:uppercase; letter-spacing:.08em; }
+
+  .form-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:1.75rem 2rem 1.5rem; margin-top:-1.75rem; position:relative; z-index:2; }
+  .form-control,.form-select { border-color:var(--border); border-radius:8px; font-size:.93rem; transition:border-color .2s,box-shadow .2s; }
+  .form-control:focus,.form-select:focus { border-color:var(--amber); box-shadow:0 0 0 3px rgba(245,158,11,.15); }
+  .form-label { font-size:.82rem; font-weight:500; margin-bottom:.3rem; }
+  .input-toggle { display:flex; gap:.5rem; margin-bottom:.75rem; }
+  .input-toggle label { display:flex; align-items:center; gap:.35rem; cursor:pointer; padding:.35rem .85rem; border-radius:100px; font-size:.82rem; font-weight:500; border:2px solid var(--border); transition:all .2s; }
+  .input-toggle input:checked + span { color:var(--amber); }
+  .input-toggle input { display:none; }
+  .input-toggle label:has(input:checked) { border-color:var(--amber); background:rgba(245,158,11,.08); }
+  .btn-predict { background:var(--navy); color:#fff; font-family:var(--font-d); font-size:1rem; font-weight:700; border:none; border-radius:8px; padding:.75rem 2rem; width:100%; transition:background .2s,transform .15s; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+  .btn-predict:hover { background:var(--navy-soft); transform:translateY(-1px); }
+
+  .summary-bar { background:var(--navy); border-radius:var(--radius); padding:1.1rem 1.75rem; display:flex; flex-wrap:wrap; gap:.75rem 1.75rem; align-items:center; margin-bottom:1.5rem; animation:slideDown .4s ease; }
+  .s-stat { display:flex; flex-direction:column; gap:.1rem; }
+  .s-label { font-size:.67rem; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.45); }
+  .s-val { font-family:var(--font-d); font-size:1.1rem; font-weight:700; color:#fff; }
+  .s-val.amber { color:var(--amber); }
+  .s-div { width:1px; height:30px; background:rgba(255,255,255,.12); }
+
+  .tier-tabs { display:flex; gap:.5rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+  .tier-tab { display:flex; align-items:center; gap:.4rem; padding:.45rem 1.1rem; border-radius:100px; font-size:.85rem; font-weight:500; cursor:pointer; border:2px solid transparent; transition:all .2s; background:#fff; user-select:none; }
+  .badge-cnt { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; font-size:.68rem; font-weight:700; }
+  .tier-tab.all   { border-color:var(--navy);   color:var(--navy); }
+  .tier-tab.safe  { border-color:var(--safe);   color:var(--safe); }
+  .tier-tab.target{ border-color:var(--target); color:var(--target); }
+  .tier-tab.dream { border-color:var(--dream);  color:var(--dream); }
+  .tier-tab.active.all   { background:var(--navy);   color:#fff; }
+  .tier-tab.active.safe  { background:var(--safe);   color:#fff; }
+  .tier-tab.active.target{ background:var(--target); color:#fff; }
+  .tier-tab.active.dream { background:var(--dream);  color:#fff; }
+  .tier-tab.active .badge-cnt { background:rgba(255,255,255,.25); color:#fff; }
+  .tier-tab:not(.active) .badge-cnt { background:currentColor; color:#fff; opacity:.7; }
+
+  .college-card { background:#fff; border-radius:var(--radius); box-shadow:0 2px 12px rgba(13,27,42,.07); margin-bottom:.875rem; overflow:hidden; border-left:4px solid transparent; transition:transform .2s,box-shadow .2s; animation:fadeUp .35s ease both; }
+  .college-card:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(13,27,42,.12); }
+  .college-card.safe-card   { border-left-color:var(--safe); }
+  .college-card.target-card { border-left-color:var(--target); }
+  .college-card.dream-card  { border-left-color:var(--dream); }
+
+  .card-top { padding:1.1rem 1.4rem .6rem; display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .college-name { font-family:var(--font-d); font-size:1rem; font-weight:700; color:var(--navy); flex:1; line-height:1.3; }
+  .college-city { font-size:.78rem; color:var(--muted); font-weight:400; }
+  .score-bubble { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:68px; padding:.45rem .7rem; border-radius:8px; text-align:center; flex-shrink:0; }
+  .score-num { font-family:var(--font-d); font-size:1.3rem; font-weight:800; line-height:1; }
+  .score-lbl { font-size:.6rem; font-weight:500; letter-spacing:.05em; text-transform:uppercase; margin-top:.12rem; }
+  .score-excellent { background:#ecfdf5; color:var(--safe); }
+  .score-good      { background:#eff6ff; color:var(--target); }
+  .score-fair      { background:#fffbeb; color:#b45309; }
+  .score-low       { background:#faf5ff; color:var(--dream); }
+
+  .card-meta { padding:0 1.4rem .5rem; display:flex; flex-wrap:wrap; gap:.35rem; }
+  .m-chip { display:inline-flex; align-items:center; gap:.25rem; font-size:.75rem; background:#f3f4f6; color:var(--navy-soft); padding:.18rem .6rem; border-radius:100px; }
+  .tier-chip { font-size:.7rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:.18rem .7rem; border-radius:100px; }
+  .tier-chip.safe   { background:#d1fae5; color:#065f46; }
+  .tier-chip.target { background:#dbeafe; color:#1e40af; }
+  .tier-chip.dream  { background:#ede9fe; color:#4c1d95; }
+  .gap-badge { font-size:.75rem; font-weight:700; padding:.18rem .55rem; border-radius:4px; display:inline-block; }
+  .gap-pos { background:#d1fae5; color:#065f46; }
+  .gap-neg { background:#ffe4e6; color:#9f1239; }
+
+  .score-bars { padding:.65rem 1.4rem .85rem; border-top:1px solid #f3f4f6; }
+  .bar-row { display:flex; align-items:center; gap:.65rem; margin-bottom:.4rem; }
+  .bar-lbl { font-size:.72rem; color:var(--muted); width:105px; flex-shrink:0; }
+  .bar-track { flex:1; height:5px; background:#f3f4f6; border-radius:3px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:3px; transition:width .6s ease; }
+  .bar-fill.rank  { background:var(--amber); }
+  .bar-fill.state { background:var(--target); }
+  .bar-fill.cat   { background:var(--safe); }
+  .bar-pts { font-size:.72rem; font-weight:600; color:var(--navy); width:42px; text-align:right; flex-shrink:0; }
+
+  .breakdown-toggle { display:flex; align-items:center; gap:.35rem; font-size:.78rem; color:var(--muted); cursor:pointer; padding:.4rem 1.4rem .65rem; border:none; background:none; width:100%; text-align:left; user-select:none; }
+  .breakdown-toggle:hover { color:var(--navy); }
+  .breakdown-body { padding:.65rem 1.4rem .85rem; border-top:1px dashed #e5e7eb; background:#fafafa; }
+  .reason-item { font-size:.78rem; color:#4b5563; display:flex; gap:.45rem; margin-bottom:.35rem; line-height:1.5; }
+
+  .advice-row { background:var(--cream); border-top:1px solid #f3ead7; padding:.55rem 1.4rem; font-size:.8rem; color:#78350f; display:flex; align-items:flex-start; gap:.45rem; }
+
+  .empty-state { text-align:center; padding:3.5rem 2rem; color:var(--muted); }
+  .empty-state .icon { font-size:2.8rem; margin-bottom:.75rem; }
+  .empty-state h3 { font-family:var(--font-d); font-size:1.2rem; color:var(--navy); }
+
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp    { from{opacity:0;transform:translateY(8px)}  to{opacity:1;transform:translateY(0)} }
+  .college-card:nth-child(1){animation-delay:.04s}.college-card:nth-child(2){animation-delay:.08s}
+  .college-card:nth-child(3){animation-delay:.12s}.college-card:nth-child(4){animation-delay:.16s}
+  .college-card:nth-child(5){animation-delay:.20s}.college-card:nth-child(6){animation-delay:.24s}
+  .college-card:nth-child(7){animation-delay:.28s}.college-card:nth-child(8){animation-delay:.32s}
+  @media(max-width:576px){.form-card{padding:1.25rem}.hero{padding:2.5rem 1rem 2rem}.summary-bar{flex-direction:column;gap:.6rem}.s-div{display:none}.hero .stats-bar{gap:1rem;flex-wrap:wrap}}
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="hero">
+  <h1>Find Your Perfect <span>NEET Match</span></h1>
+  <p>Rank-based college prediction powered by real MCC counselling data with Dream · Target · Safe tiers and a 100-point fitness score.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── FORM ──────────────────────────────────────────────────────── -->
+<div class="form-card mb-4">
+  <form method="post" id="predict-form">
+    {% csrf_token %}
+
+    <!-- Input Mode Toggle -->
+    <div class="input-toggle">
+      <label><input type="radio" name="input_mode" value="rank" checked onclick="toggleInput('rank')"><span><i class="bi bi-hash"></i> Enter Rank</span></label>
+      <label><input type="radio" name="input_mode" value="score" onclick="toggleInput('score')"><span><i class="bi bi-award"></i> Enter Score</span></label>
+    </div>
+
+    <div class="row g-3 align-items-end">
+
+      <div class="col-12 col-sm-6 col-md-3" id="rank-field">
+        <label class="form-label"><i class="bi bi-hash me-1" style="color:var(--amber)"></i>NEET Rank</label>
+        {{ form.rank }}
+        {% if form.rank.errors %}<div class="text-danger mt-1" style="font-size:.78rem;">{{ form.rank.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3" id="score-field" style="display:none">
+        <label class="form-label"><i class="bi bi-award me-1" style="color:var(--amber)"></i>NEET Score (0-720)</label>
+        {{ form.neet_score }}
+        {% if form.neet_score.errors %}<div class="text-danger mt-1" style="font-size:.78rem;">{{ form.neet_score.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <label class="form-label"><i class="bi bi-mortarboard me-1" style="color:var(--amber)"></i>Target Course</label>
+        {{ form.course }}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <label class="form-label"><i class="bi bi-tag me-1" style="color:var(--amber)"></i>Category</label>
+        {{ form.category }}
+        {% if form.category.errors %}<div class="text-danger mt-1" style="font-size:.78rem;">{{ form.category.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <label class="form-label"><i class="bi bi-geo-alt me-1" style="color:var(--amber)"></i>Home State</label>
+        {{ form.state }}
+        {% if form.state.errors %}<div class="text-danger mt-1" style="font-size:.78rem;">{{ form.state.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <label class="form-label"><i class="bi bi-ui-radios me-1" style="color:var(--amber)"></i>Quota</label>
+        {{ form.quota }}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <label class="form-label"><i class="bi bi-building me-1" style="color:var(--amber)"></i>College Type</label>
+        {{ form.college_type }}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <label class="form-label"><i class="bi bi-sort-down me-1" style="color:var(--amber)"></i>Sort By</label>
+        {{ form.sort_by }}
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <label class="form-label"><i class="bi bi-currency-rupee me-1" style="color:var(--amber)"></i>Max Budget/Year</label>
+        {{ form.budget }}
+      </div>
+
+      <div class="col-12">
+        <button type="submit" class="btn-predict" id="submit-btn">
+          <span class="btn-text"><i class="bi bi-stars"></i>Predict My Colleges</span>
+          <span class="btn-loading d-none"><span class="spinner-border spinner-border-sm" role="status"></span>Analysing…</span>
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>
+{% endif %}
+
+{% if results %}
+<!-- ── SUMMARY BAR ─────────────────────────────────────────────── -->
+<div class="summary-bar">
+  <div class="s-stat"><span class="s-label">Your Rank</span><span class="s-val amber"># {{ student_rank }}</span></div>
+  <div class="s-div"></div>
+  <div class="s-stat"><span class="s-label">Category</span><span class="s-val">{{ student_cat }}</span></div>
+  <div class="s-div"></div>
+  <div class="s-stat"><span class="s-label">State</span><span class="s-val">{{ student_state }}</span></div>
+  <div class="s-div"></div>
+  <div class="s-stat"><span class="s-label">Colleges Found</span><span class="s-val">{{ total }}</span></div>
+  <div class="s-div"></div>
+  <div class="s-stat"><span class="s-label">Top Score</span><span class="s-val amber">{{ top_score }}%</span></div>
+  <div class="s-div"></div>
+  <div class="s-stat"><span class="s-label">Safe · Target · Dream</span><span class="s-val">{{ safe_count }} · {{ target_count }} · {{ dream_count }}</span></div>
+</div>
+<!-- ── ACTION BAR ─────────────────────────────────────────────── -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <form method="post" action="{% url 'predictions:export-pdf' %}" id="pdf-form" style="margin:0;">
+    {% csrf_token %}
+    <input type="hidden" name="input_mode" value="{{ form.input_mode.value|default:'rank' }}">
+    <input type="hidden" name="rank" value="{{ form.rank.value|default:'' }}">
+    <input type="hidden" name="neet_score" value="{{ form.neet_score.value|default:'' }}">
+    <input type="hidden" name="category" value="{{ form.category.value|default:'' }}">
+    <input type="hidden" name="state" value="{{ form.state.value|default:'' }}">
+    <input type="hidden" name="quota" value="{{ form.quota.value|default:'' }}">
+    <input type="hidden" name="college_type" value="{{ form.college_type.value|default:'' }}">
+    <input type="hidden" name="sort_by" value="{{ form.sort_by.value|default:'score' }}">
+    <input type="hidden" name="course" value="{{ form.course.value|default:'MBBS' }}">
+    <button type="submit" class="btn btn-outline-dark btn-sm"><i class="bi bi-file-earmark-pdf me-1"></i>Download PDF Report</button>
+  </form>
+  <a href="{% url 'predictions:trends' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-graph-up-arrow me-1"></i>View Cutoff Trends</a>
+</div>
+
+<!-- ── TIER TABS ──────────────────────────────────────────────── -->
+<div class="tier-tabs">
+  <button class="tier-tab all active" data-filter="all"><i class="bi bi-grid-3x3-gap-fill"></i>All<span class="badge-cnt">{{ total }}</span></button>
+  <button class="tier-tab safe"   data-filter="safe"><i class="bi bi-shield-check"></i>Safe<span class="badge-cnt">{{ safe_count }}</span></button>
+  <button class="tier-tab target" data-filter="target"><i class="bi bi-bullseye"></i>Target<span class="badge-cnt">{{ target_count }}</span></button>
+  <button class="tier-tab dream"  data-filter="dream"><i class="bi bi-stars"></i>Dream<span class="badge-cnt">{{ dream_count }}</span></button>
+</div>
+
+<!-- ── COLLEGE CARDS ──────────────────────────────────────────── -->
+<div id="college-list">
+{% for college in results %}
+<div class="college-card {{ college.tier|lower }}-card" data-tier="{{ college.tier|lower }}">
+
+  <div class="card-top">
+    <div>
+      <div class="college-name">{{ college.college }}</div>
+      <div class="college-city"><i class="bi bi-geo-alt-fill"></i> {{ college.city }}, {{ college.state }}</div>
+    </div>
+    <div class="score-bubble {{ college.score_css }}">
+      <span class="score-num">{{ college.score_total|floatformat:0 }}</span>
+      <span class="score-lbl">/ 100</span>
+    </div>
+  </div>
+
+  <div class="card-meta">
+    <span class="tier-chip {{ college.tier|lower }}">
+      {{ college.tier }} Option
+    </span>
+    <span class="m-chip"><i class="bi bi-building"></i>{{ college.college_type }}</span>
+    <span class="m-chip"><i class="bi bi-ticket-perforated"></i>{{ college.quota }}</span>
+    <span class="m-chip"><i class="bi bi-currency-rupee"></i>{{ college.annual_fee }} /yr</span>
+    <span class="m-chip"><i class="bi bi-trophy"></i>Cutoff: {{ college.closing_rank }}</span>
+    {% if college.mbbs_seats %}<span class="m-chip"><i class="bi bi-people"></i>{{ college.mbbs_seats }} seats</span>{% endif %}
+    <span class="m-chip"><i class="bi bi-mortarboard"></i>{{ college.course_type }}</span>
+    <span class="m-chip"><i class="bi bi-journal-text"></i>Bond: {{ college.bond_years }}yr ({{ college.bond_penalty }})</span>
+    {% if college.nmc_ranking %}<span class="m-chip"><i class="bi bi-star-fill" style="color:var(--amber)"></i>NMC Rank #{{ college.nmc_ranking }}</span>{% endif %}
+    <span class="gap-badge {% if college.rank_gap >= 0 %}gap-pos{% else %}gap-neg{% endif %}">Gap {{ college.rank_gap_display }}</span>
+  </div>
+
+  <div class="score-bars">
+    <div class="bar-row">
+      <span class="bar-lbl">Rank Proximity</span>
+      <div class="bar-track"><div class="bar-fill rank" style="width:{{ college.breakdown.rank.pct }}%"></div></div>
+      <span class="bar-pts">{{ college.breakdown.rank.score|floatformat:1 }}/60</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-lbl">State Match</span>
+      <div class="bar-track"><div class="bar-fill state" style="width:{{ college.breakdown.state.pct }}%"></div></div>
+      <span class="bar-pts">{{ college.breakdown.state.score|floatformat:1 }}/25</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-lbl">Category Bonus</span>
+      <div class="bar-track"><div class="bar-fill cat" style="width:{{ college.breakdown.category.pct }}%"></div></div>
+      <span class="bar-pts">{{ college.breakdown.category.score|floatformat:1 }}/15</span>
+    </div>
+  </div>
+
+  <button class="breakdown-toggle" onclick="toggleBD(this)">
+    <i class="bi bi-chevron-down"></i> View score reasoning
+  </button>
+  <div class="breakdown-body" style="display:none">
+    <div class="reason-item"><span>📊</span><span><strong>Rank:</strong> {{ college.breakdown.rank.reason }}</span></div>
+    <div class="reason-item"><span>🗺️</span><span><strong>State:</strong> {{ college.breakdown.state.reason }}</span></div>
+    <div class="reason-item"><span>🏷️</span><span><strong>Category:</strong> {{ college.breakdown.category.reason }}</span></div>
+  </div>
+
+  <div class="advice-row"><i class="bi bi-lightbulb-fill"></i>{{ college.advice }}</div>
+  {% if college.probability %}
+  <div style="text-align:right;margin-top:.3rem;"><span style="font-size:.75rem;padding:.2rem .6rem;border-radius:100px;font-weight:700;{% if college.probability >= 70 %}background:#d1fae5;color:#065f46{% elif college.probability >= 40 %}background:#dbeafe;color:#1e40af{% else %}background:#fef3c7;color:#92400e{% endif %}">{{ college.probability }}% admission probability</span></div>
+  {% endif %}
+</div>
+{% endfor %}
+</div>
+
+<div id="empty-filter" class="empty-state" style="display:none">
+  <div class="icon"><i class="bi bi-search"></i></div>
+  <h3>No colleges in this tier</h3>
+  <p>Switch tabs to see results in other tiers.</p>
+</div>
+
+<!-- ── AI COUNSELING DASHBOARD ─────────────────────────────────────── -->
+<div style="margin-top:2rem; font-family: 'Inter', sans-serif;">
+
+<!-- Risk Alerts -->
+{% if smart_alerts %}
+<div style="background:#fef2f2; border: 1px solid #fecaca; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; border-left:4px solid #ef4444;">
+  <h3 style="font-size:1.1rem; margin:0 0 .75rem; color:#b91c1c; font-weight: 600;">Risk Alerts</h3>
+  <ul style="margin:0; padding-left:1.5rem; color:#991b1b; font-size: .9rem;">
+    {% for alert in smart_alerts %}
+    <li style="margin-bottom: .25rem;">{{ alert }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<!-- Final Recommendation -->
+<div style="background:#f8fafc; border: 1px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
+  <h3 style="font-size:1.1rem; margin:0 0 1rem; color:#0f172a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Final Recommendation</h3>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+    <div>
+      <div style="font-size:.75rem; color:#64748b; text-transform:uppercase;">Best Option</div>
+      <div style="font-weight:600; color:#0f172a; margin-top:.25rem;">{{ final_rec.best_option }} <span style="font-size: .65rem; background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; margin-left: 4px; vertical-align: middle;">RECOMMENDED</span></div>
+    </div>
+    <div>
+      <div style="font-size:.75rem; color:#64748b; text-transform:uppercase;">Safer Alternatives</div>
+      <div style="font-size:.9rem; color:#334155; margin-top:.25rem;">
+        {% if final_rec.alternatives %}
+          {% for alt in final_rec.alternatives %}{{ alt }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        {% else %}
+          None identified
+        {% endif %}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:.75rem; color:#64748b; text-transform:uppercase;">Risk Level</div>
+      <div style="font-weight:600; margin-top:.25rem; 
+        {% if final_rec.risk_level == 'LOW' %}color:#16a34a;{% elif final_rec.risk_level == 'MEDIUM' %}color:#ca8a04;{% else %}color:#dc2626;{% endif %}">
+        {{ final_rec.risk_level }}
+        {% if final_rec.risk_level == 'HIGH' %}<span style="font-size: .65rem; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; margin-left: 4px; vertical-align: middle;">HIGH RISK</span>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recommended Colleges & Admission Probability -->
+{% if choice_safe or choice_target %}
+<div style="background:#ffffff; border: 1px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
+  <h3 style="font-size:1.1rem; margin:0 0 1rem; color:#0f172a; font-weight: 600;">Recommended Colleges</h3>
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: .85rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b;">
+          <th style="padding: .75rem .5rem;">College Name</th>
+          <th style="padding: .75rem .5rem;">Category</th>
+          <th style="padding: .75rem .5rem;">Annual Fee</th>
+          <th style="padding: .75rem .5rem;">Admission Probability</th>
+          <th style="padding: .75rem .5rem;">AI Assessment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in choice_safe|slice:":3" %}
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: .75rem .5rem; font-weight: 500; color: #0f172a;">{{ c.college }}</td>
+          <td style="padding: .75rem .5rem; color: #475569;">{{ student_cat }}</td>
+          <td style="padding: .75rem .5rem; color: #475569;">{{ c.annual_fee }}</td>
+          <td style="padding: .75rem .5rem;">
+            <div style="display: flex; align-items: center; gap: .5rem;">
+              <div style="width: 50px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                <div style="height: 100%; width: {{ c.probability }}%; background: #10b981;"></div>
+              </div>
+              <span style="font-weight: 600; color: #10b981;">{{ c.probability }}%</span>
+            </div>
+          </td>
+          <td style="padding: .75rem .5rem; color: #475569; font-size: .8rem;">Safe Option</td>
+        </tr>
+        {% endfor %}
+        {% for c in choice_target|slice:":3" %}
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: .75rem .5rem; font-weight: 500; color: #0f172a;">{{ c.college }}</td>
+          <td style="padding: .75rem .5rem; color: #475569;">{{ student_cat }}</td>
+          <td style="padding: .75rem .5rem; color: #475569;">{{ c.annual_fee }}</td>
+          <td style="padding: .75rem .5rem;">
+            <div style="display: flex; align-items: center; gap: .5rem;">
+              <div style="width: 50px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                <div style="height: 100%; width: {{ c.probability }}%; background: #3b82f6;"></div>
+              </div>
+              <span style="font-weight: 600; color: #3b82f6;">{{ c.probability }}%</span>
+            </div>
+          </td>
+          <td style="padding: .75rem .5rem; color: #475569; font-size: .8rem;">Target Option</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Key Insights -->
+{% if whatif %}
+<div style="background:#ffffff; border: 1px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
+  <h3 style="font-size:1.1rem; margin:0 0 1rem; color:#0f172a; font-weight: 600;">Key Insights</h3>
+  <p style="font-size:.85rem; color:#475569; margin:0 0 1rem;">Sensitivity analysis based on a standard deviation of ±20 marks:</p>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+    {% for label, wi in whatif.items %}
+    <div style="padding:1rem; border: 1px solid #f1f5f9; border-radius:8px; background: #f8fafc;">
+      <div style="font-weight:600; font-size:.9rem; color:#0f172a; margin-bottom:.5rem; text-transform: uppercase; letter-spacing: 0.05em;">{{ label }} Scenario (Rank: {{ wi.rank }})</div>
+      <div style="font-size:.85rem; color:#475569;">
+        Total Options: {{ wi.total }}<br>
+        <span style="color:#16a34a;">Safe: {{ wi.safe }}</span> | 
+        <span style="color:#2563eb;">Target: {{ wi.target }}</span> | 
+        <span style="color:#9333ea;">Ambitious: {{ wi.dream }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Counseling Guidance -->
+<div style="background:#ffffff; border: 1px solid #e2e8f0; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem;">
+  <h3 style="font-size:1.1rem; margin:0 0 1rem; color:#0f172a; font-weight: 600;">Next Steps</h3>
+  <ul style="margin:0; padding-left:1.5rem; color:#475569; font-size: .85rem; line-height: 1.6;">
+    <li>Register on the official MCC portal (mcc.nic.in) for All India Quota (15%) counselling.</li>
+    <li>Register on your respective state medical counselling portal for State Quota (85%) seats.</li>
+    <li>Prepare documentation: Class 10/12 certificates, NEET scorecard, category certificate (if applicable), domicile certificate, and official ID.</li>
+    <li>Execute choice filling using the recommended hierarchical order (Dream options first, followed by Target and Safe options).</li>
+    <li>Participate actively in Round 2 and Mop-up rounds to maximize probability of securing a seat.</li>
+  </ul>
+</div>
+  <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+    <a href="{% url 'predictions:scholarships' %}" class="btn btn-outline-dark btn-sm"><i class="bi bi-mortarboard me-1"></i>Scholarships</a>
+    <a href="{% url 'predictions:trends' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-graph-up-arrow me-1"></i>Cutoff Trends</a>
+  </div>
+</div>
+
+</div><!-- end AI panels -->
+
+{% else %}
+<div class="empty-state">
+  <div class="icon">🏥</div>
+  <h3>Enter your details above to get started</h3>
+  <p>College predictions with Dream · Target · Safe tiers and 100-point scores will appear here.</p>
+  <div class="mt-3 d-flex gap-2 justify-content-center flex-wrap">
+    <a href="{% url 'predictions:formula' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-info-circle me-1"></i>How is the score calculated?
+    </a>
+    <a href="{% url 'predictions:colleges' %}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-building me-1"></i>Browse All Colleges
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- AI Chatbot UI -->
+<div id="ai-chatbot" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end;">
+  <!-- Call Us Button -->
+  <a href="tel:+918989007693" class="btn btn-primary" style="background: #3b82f6; border-color: #3b82f6; border-radius: 50%; width: 60px; height: 60px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+    <i class="bi bi-telephone-fill" style="font-size: 1.5rem; color: white;"></i>
+  </a>
+
+  <!-- WhatsApp Chat Button -->
+  <a href="https://wa.me/918989007693" class="btn btn-success" target="_blank" style="background: #25d366; border-color: #25d366; border-radius: 50%; width: 60px; height: 60px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+    <i class="bi bi-whatsapp" style="font-size: 1.5rem; color: white;"></i>
+  </a>
+  
+  <button id="chat-toggle" class="btn btn-primary" style="background: #0f172a; border-color: #0f172a; border-radius: 50%; width: 60px; height: 60px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onclick="toggleChat()">
+    <i class="bi bi-chat-dots-fill" style="font-size: 1.5rem;"></i>
+  </button>
+  
+  <div id="chat-window" style="display: none; width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); flex-direction: column; position: absolute; bottom: 80px; right: 0; border: 1px solid #e2e8f0; overflow: hidden;">
+    <div style="background: #0f172a; color: white; padding: 1rem; font-family: 'Inter', sans-serif; display: flex; justify-content: space-between; align-items: center;">
+      <div style="font-weight: 600;"><i class="bi bi-robot me-2"></i>AI Counseling Assistant</div>
+      <button onclick="toggleChat()" style="background:none; border:none; color:white;"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div id="chat-messages" style="flex: 1; padding: 1rem; overflow-y: auto; font-family: 'Inter', sans-serif; font-size: 0.9rem; background: #f8fafc; display: flex; flex-direction: column; gap: 10px;">
+      <div style="background: white; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px 8px 8px 0; align-self: flex-start; max-width: 85%;">
+        Hello! I am your AI Counseling Assistant. You can ask me about your safe options, target colleges, budget constraints, or choice-filling strategy.
+      </div>
+    </div>
+    <div style="padding: 10px; border-top: 1px solid #e2e8f0; background: white;">
+      <form id="chat-form" onsubmit="sendChatMessage(event)" style="display: flex; gap: 8px;">
+        <input type="text" id="chat-input" placeholder="Ask a question..." style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 20px; outline: none; font-size: 0.9rem;" required>
+        <button type="submit" style="background: #0f172a; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-send-fill"></i></button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const chatContext = {
+    rank: "{{ student_rank|default:0 }}",
+    category: "{{ student_cat|default:'' }}",
+    state: "{{ student_state|default:'' }}",
+    budget: "{{ budget|default:'' }}",
+    course: "{{ student_course|default:'MBBS' }}",
+    safe_colleges: [
+        {% for c in choice_safe|slice:":5" %}
+        {college: "{{ c.college|escapejs }}", probability: {{ c.probability|default:0 }}, annual_fee: "{{ c.annual_fee|escapejs }}" },
+        {% endfor %}
+    ],
+    target_colleges: [
+        {% for c in choice_target|slice:":5" %}
+        {college: "{{ c.college|escapejs }}", probability: {{ c.probability|default:0 }} },
+        {% endfor %}
+    ],
+    dream_colleges: [
+        {% for c in choice_dream|slice:":5" %}
+        {college: "{{ c.college|escapejs }}" },
+        {% endfor %}
+    ]
+};
+
+function toggleChat() {
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function sendChatMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chat-input');
+    const msg = input.value.trim();
+    if(!msg) return;
+    
+    // Add user message
+    appendMessage(msg, 'user');
+    input.value = '';
+    
+    // Add loading indicator
+    const loadingId = 'loading-' + Date.now();
+    appendLoading(loadingId);
+    
+    try {
+        const response = await fetch('/chat/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ query: msg, context: chatContext })
+        });
+        const data = await response.json();
+        
+        // Remove loading
+        document.getElementById(loadingId).remove();
+        
+        if (data.status === 'success') {
+            appendMessage(data.response, 'ai');
+        } else {
+            appendMessage("Sorry, I encountered an error. Please try again.", 'ai');
+        }
+    } catch (err) {
+        document.getElementById(loadingId).remove();
+        appendMessage("Network error. Please check your connection.", 'ai');
+    }
+}
+
+function appendMessage(text, sender) {
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    if (sender === 'user') {
+        div.style = "background: #0f172a; color: white; padding: 10px; border-radius: 8px 8px 0 8px; align-self: flex-end; max-width: 85%;";
+        div.innerText = text; // Prevent HTML injection for user input
+    } else {
+        div.style = "background: white; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px 8px 8px 0; align-self: flex-start; max-width: 85%;";
+        div.innerHTML = text; // AI output can contain safe HTML
+    }
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function appendLoading(id) {
+    const container = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.id = id;
+    div.style = "background: white; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px 8px 8px 0; align-self: flex-start; max-width: 85%; color: #94a3b8; font-style: italic;";
+    div.innerText = "Typing...";
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleInput(mode) {
+  document.getElementById('rank-field').style.display = mode==='rank' ? '' : 'none';
+  document.getElementById('score-field').style.display = mode==='score' ? '' : 'none';
+}
+
+document.getElementById('predict-form').addEventListener('submit',function(){
+  document.querySelector('.btn-text').classList.add('d-none');
+  document.querySelector('.btn-loading').classList.remove('d-none');
+});
+
+document.querySelectorAll('.tier-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.tier-tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+    var f=this.dataset.filter, visible=0;
+    document.querySelectorAll('.college-card').forEach(function(c){
+      var show=f==='all'||c.dataset.tier===f;
+      c.style.display=show?'':'none';
+      if(show) visible++;
+    });
+    var el=document.getElementById('empty-filter');
+    if(el) el.style.display=visible===0?'block':'none';
+  });
+});
+
+function toggleBD(btn){
+  var body=btn.nextElementSibling;
+  var icon=btn.querySelector('i');
+  var open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  icon.className=open?'bi bi-chevron-down':'bi bi-chevron-up';
+  btn.childNodes[btn.childNodes.length-1].textContent=open?' View score reasoning':' Hide reasoning';
+}
+
+window.addEventListener('load',function(){
+  document.querySelectorAll('.bar-fill').forEach(function(bar){
+    var w=bar.style.width; bar.style.width='0';
+    setTimeout(function(){bar.style.width=w;},120);
+  });
+});
+</script>
+{% endblock %}

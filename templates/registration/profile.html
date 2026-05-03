@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}My Profile — NEETPredict AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-hero { background:linear-gradient(135deg,var(--navy),#243b55); padding:2.75rem 2rem; text-align:center; }
+  .page-hero h1 { font-family:var(--font-d); font-size:2rem; color:#fff; font-weight:800; }
+  .page-hero p  { color:rgba(255,255,255,.6); max-width:460px; margin:.5rem auto 0; }
+  .profile-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .profile-header { background:var(--navy); padding:2rem; text-align:center; position:relative; }
+  .profile-avatar { width:80px; height:80px; background:var(--amber); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--font-d); font-weight:800; font-size:1.8rem; color:var(--navy); margin:0 auto 1rem; border:4px solid rgba(255,255,255,.2); }
+  .profile-name { font-family:var(--font-d); font-size:1.3rem; font-weight:700; color:#fff; }
+  .profile-email { font-size:.85rem; color:rgba(255,255,255,.5); }
+  .profile-body { padding:1.5rem 2rem; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .info-item { padding:.75rem 1rem; background:#f8fafc; border-radius:8px; border:1px solid var(--border); }
+  .info-label { font-size:.72rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:.2rem; }
+  .info-value { font-family:var(--font-d); font-size:1rem; font-weight:700; color:var(--navy); }
+  @media(max-width:576px) { .info-grid { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="page-hero">
+  <h1><i class="bi bi-person-circle me-2"></i>My Profile</h1>
+  <p>Your account details and NEET information.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="profile-card" style="max-width:600px;margin:0 auto;">
+  <div class="profile-header">
+    <div class="profile-avatar">{{ user.first_name.0|upper }}{{ user.last_name.0|upper }}</div>
+    <div class="profile-name">{{ user.get_full_name }}</div>
+    <div class="profile-email">{{ user.email }}</div>
+  </div>
+  <div class="profile-body">
+    <h6 style="font-family:var(--font-d);font-weight:700;margin-bottom:1rem;"><i class="bi bi-mortarboard me-1" style="color:var(--amber);"></i>Student Details</h6>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">Category</div>
+        <div class="info-value">{{ profile.category|default:"Not set" }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Home State</div>
+        <div class="info-value">{{ profile.state_of_domicile|default:"Not set" }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">NEET Rank</div>
+        <div class="info-value">{% if profile.neet_rank %}#{{ profile.neet_rank }}{% else %}Not set{% endif %}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">NEET Score</div>
+        <div class="info-value">{% if profile.neet_score %}{{ profile.neet_score }}/720{% else %}Not set{% endif %}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">NEET Year</div>
+        <div class="info-value">{{ profile.neet_year|default:"Not set" }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Phone</div>
+        <div class="info-value">{{ profile.phone|default:"Not set" }}</div>
+      </div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="{% url 'predictions:predict' %}" class="btn btn-dark btn-sm"><i class="bi bi-stars me-1"></i>Run Prediction</a>
+      <a href="{% url 'predictions:history' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-clock-history me-1"></i>View History</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

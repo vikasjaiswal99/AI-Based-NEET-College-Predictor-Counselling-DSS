@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Cutoff Trends — NEETPredict AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-hero { background:linear-gradient(135deg,var(--navy),#243b55); padding:2.75rem 2rem; text-align:center; }
+  .page-hero h1 { font-family:var(--font-d); font-size:2rem; color:#fff; font-weight:800; }
+  .page-hero p  { color:rgba(255,255,255,.6); max-width:520px; margin:.5rem auto 0; }
+  .filter-bar { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem 1.5rem; margin-top:-1.5rem; position:relative; z-index:2; margin-bottom:1.5rem; }
+  .section-title { font-family:var(--font-d); font-size:1.15rem; font-weight:700; color:var(--navy); margin:1.25rem 0 .75rem; display:flex; align-items:center; gap:.5rem; }
+  .trend-table { width:100%; border-collapse:separate; border-spacing:0; background:#fff; border-radius:var(--radius); box-shadow:0 2px 10px rgba(13,27,42,.06); overflow:hidden; margin-bottom:1.5rem; }
+  .trend-table thead th { background:var(--navy); color:#fff; font-size:.78rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase; padding:.7rem 1rem; text-align:left; }
+  .trend-table tbody td { padding:.65rem 1rem; font-size:.85rem; border-bottom:1px solid #f3f4f6; }
+  .trend-table tbody tr:hover { background:#f8fafc; }
+  .trend-table .college-name { font-family:var(--font-d); font-weight:700; color:var(--navy); }
+  .trend-table .state { font-size:.75rem; color:var(--muted); }
+  .trend-icon { font-size:1rem; }
+  .dir-tightening { color:#dc2626; font-weight:700; }
+  .dir-easing { color:#059669; font-weight:700; }
+  .dir-stable { color:#6b7280; font-weight:700; }
+  .yr-pill { display:inline-block; font-size:.72rem; padding:.15rem .5rem; border-radius:100px; background:#f3f4f6; margin:.1rem; font-weight:500; }
+  .change-badge { font-family:var(--font-d); font-weight:700; font-size:.85rem; }
+  .change-neg { color:#dc2626; }
+  .change-pos { color:#059669; }
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="page-hero">
+  <h1><i class="bi bi-graph-up-arrow me-2"></i>Cutoff Trends</h1>
+  <p>See how college cutoffs are changing year-over-year. Identify tightening and easing opportunities.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-6 col-md-4">
+      <label class="form-label" style="font-size:.82rem;">Category</label>
+      <select name="category" class="form-select">
+        <option value="GEN" {% if category == "GEN" %}selected{% endif %}>General</option>
+        <option value="OBC" {% if category == "OBC" %}selected{% endif %}>OBC</option>
+        <option value="SC" {% if category == "SC" %}selected{% endif %}>SC</option>
+        <option value="ST" {% if category == "ST" %}selected{% endif %}>ST</option>
+        <option value="EWS" {% if category == "EWS" %}selected{% endif %}>EWS</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-4">
+      <label class="form-label" style="font-size:.82rem;">Quota</label>
+      <select name="quota" class="form-select">
+        <option value="AIQ" {% if quota == "AIQ" %}selected{% endif %}>All India Quota</option>
+        <option value="SQ" {% if quota == "SQ" %}selected{% endif %}>State Quota</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-4">
+      <button type="submit" class="btn btn-dark w-100"><i class="bi bi-filter me-1"></i>Analyze Trends</button>
+    </div>
+  </form>
+</div>
+
+<!-- Tightening Section -->
+{% if tightening %}
+<div class="section-title"><span style="color:#dc2626;">📈</span> Top Tightening Colleges <span style="font-size:.75rem;color:var(--muted);font-weight:400;">(Cutoffs getting harder)</span></div>
+<table class="trend-table">
+  <thead>
+    <tr>
+      <th>College</th>
+      <th>Trend</th>
+      <th>Oldest Rank</th>
+      <th>Latest Rank</th>
+      <th>Avg Change/Yr</th>
+      <th>Years</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in tightening %}
+    <tr>
+      <td>
+        <div class="college-name">{{ t.college_name }}</div>
+        <div class="state">{{ t.state }}</div>
+      </td>
+      <td><span class="trend-icon">{{ t.direction_icon }}</span> <span class="dir-tightening">{{ t.direction }}</span></td>
+      <td>{{ t.oldest_rank|stringformat:",d" }}</td>
+      <td>{{ t.latest_rank|stringformat:",d" }}</td>
+      <td><span class="change-badge change-neg">{{ t.avg_yearly_change|floatformat:0 }}</span></td>
+      <td>
+        {% for dp in t.data_points %}
+        <span class="yr-pill">{{ dp.year }}: {{ dp.closing_rank|stringformat:",d" }}</span>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<!-- Easing Section -->
+{% if easing %}
+<div class="section-title"><span style="color:#059669;">📉</span> Top Easing Colleges <span style="font-size:.75rem;color:var(--muted);font-weight:400;">(Cutoffs getting easier)</span></div>
+<table class="trend-table">
+  <thead>
+    <tr>
+      <th>College</th>
+      <th>Trend</th>
+      <th>Oldest Rank</th>
+      <th>Latest Rank</th>
+      <th>Avg Change/Yr</th>
+      <th>Years</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in easing %}
+    <tr>
+      <td>
+        <div class="college-name">{{ t.college_name }}</div>
+        <div class="state">{{ t.state }}</div>
+      </td>
+      <td><span class="trend-icon">{{ t.direction_icon }}</span> <span class="dir-easing">{{ t.direction }}</span></td>
+      <td>{{ t.oldest_rank|stringformat:",d" }}</td>
+      <td>{{ t.latest_rank|stringformat:",d" }}</td>
+      <td><span class="change-badge change-pos">+{{ t.avg_yearly_change|floatformat:0 }}</span></td>
+      <td>
+        {% for dp in t.data_points %}
+        <span class="yr-pill">{{ dp.year }}: {{ dp.closing_rank|stringformat:",d" }}</span>
+        {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if not tightening and not easing %}
+<div class="empty-state">
+  <div style="font-size:2.5rem;">📊</div>
+  <h3 style="font-family:var(--font-d);">No trend data available</h3>
+  <p>Select a category and quota above to analyze cutoff trends.</p>
+</div>
+{% endif %}
+
+<div style="text-align:center;margin-top:1rem;">
+  <span style="font-size:.78rem;color:var(--muted);">
+    Analyzing {{ total }} colleges with multi-year data · {{ category }} · {{ quota }}
+  </span>
+</div>
+{% endblock %}

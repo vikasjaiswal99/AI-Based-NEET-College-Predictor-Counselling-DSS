@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Scoring Formula — NEETPredict AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-hero { background:linear-gradient(135deg,var(--navy),#243b55); padding:2.75rem 2rem; text-align:center; }
+  .page-hero h1 { font-family:var(--font-d); font-size:2rem; color:#fff; font-weight:800; }
+  .page-hero p  { color:rgba(255,255,255,.6); max-width:460px; margin:.5rem auto 0; }
+  .formula-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:1.25rem; }
+  .fc-header { display:flex; align-items:center; gap:.9rem; padding:1.1rem 1.5rem; background:var(--navy); }
+  .fc-icon { font-size:1.6rem; }
+  .fc-title { font-family:var(--font-d); font-size:1rem; font-weight:700; color:#fff; }
+  .fc-weight { margin-left:auto; background:var(--amber); color:var(--navy); font-family:var(--font-d); font-weight:800; font-size:.85rem; padding:.25rem .7rem; border-radius:100px; }
+  .fc-body { padding:1.1rem 1.5rem; }
+  .fc-desc { color:#4b5563; font-size:.875rem; margin-bottom:.9rem; line-height:1.65; }
+  .rule-table { width:100%; font-size:.82rem; border-collapse:collapse; }
+  .rule-table th { background:#f8fafc; color:#6b7280; font-weight:500; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; padding:.45rem .7rem; text-align:left; border-bottom:1px solid var(--border); }
+  .rule-table td { padding:.55rem .7rem; border-bottom:1px solid #f3f4f6; color:var(--navy); }
+  .rule-table tr:last-child td { border-bottom:none; }
+  .pts { display:inline-block; font-weight:700; padding:.12rem .5rem; border-radius:5px; background:#ecfdf5; color:#065f46; font-size:.78rem; }
+  .total-box { background:var(--navy); color:#fff; border-radius:var(--radius); padding:1.5rem 2rem; text-align:center; margin-bottom:1.5rem; }
+  .total-box h3 { font-family:var(--font-d); font-size:1.2rem; font-weight:800; color:var(--amber); margin-bottom:.4rem; }
+  .total-box code { background:rgba(255,255,255,.1); color:var(--amber-lt); padding:.35rem .9rem; border-radius:6px; font-size:.9rem; display:inline-block; margin:.4rem 0; }
+  .total-box p { color:rgba(255,255,255,.6); font-size:.875rem; margin:0; }
+  .label-row td { padding:.55rem .9rem; border-bottom:1px solid #f3f4f6; font-size:.85rem; }
+  .label-row:last-child td { border-bottom:none; }
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="page-hero">
+  <h1>The Scoring Formula</h1>
+  <p>Understand exactly how each college's 0–100 fitness score is calculated.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div style="max-width:740px;margin:0 auto;">
+
+  <div class="total-box">
+    <h3>Total Score = A + B + C &nbsp;(capped at 100)</h3>
+    <code>Rank Proximity (60) + State Match (25) + Category Bonus (15)</code>
+    <p class="mt-2">Every sub-score is transparent — hover any college card to see exact reasons.</p>
+  </div>
+
+  {% for comp in formula %}
+  <div class="formula-card">
+    <div class="fc-header">
+      <span class="fc-icon">{{ comp.icon }}</span>
+      <span class="fc-title">Component {{ forloop.counter }}: {{ comp.component }}</span>
+      <span class="fc-weight">Max {{ comp.weight }} pts</span>
+    </div>
+    <div class="fc-body">
+      <p class="fc-desc">{{ comp.description }}</p>
+      <table class="rule-table">
+        <thead><tr><th>Condition</th><th>Formula / Reason</th><th>Points</th></tr></thead>
+        <tbody>
+          {% for rule in comp.rules %}
+          <tr><td>{{ rule.0 }}</td><td style="color:#6b7280">{{ rule.1 }}</td><td><span class="pts">{{ rule.2 }}</span></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Score labels -->
+  <div class="formula-card">
+    <div class="fc-header"><span class="fc-icon">🏷️</span><span class="fc-title">Score Labels</span></div>
+    <div class="fc-body">
+      <table class="rule-table">
+        <tbody>
+          <tr class="label-row"><td><span style="background:#ecfdf5;color:#065f46;padding:.15rem .55rem;border-radius:5px;font-weight:700;font-size:.8rem;">Excellent</span></td><td>Score ≥ 80 — strong fit across all three components</td></tr>
+          <tr class="label-row"><td><span style="background:#eff6ff;color:#1e40af;padding:.15rem .55rem;border-radius:5px;font-weight:700;font-size:.8rem;">Good</span></td><td>Score 60–79 — solid, minor gaps in one component</td></tr>
+          <tr class="label-row"><td><span style="background:#fffbeb;color:#b45309;padding:.15rem .55rem;border-radius:5px;font-weight:700;font-size:.8rem;">Fair</span></td><td>Score 40–59 — feasible but notable disadvantages</td></tr>
+          <tr class="label-row"><td><span style="background:#faf5ff;color:#4c1d95;padding:.15rem .55rem;border-radius:5px;font-weight:700;font-size:.8rem;">Low</span></td><td>Score &lt; 40 — Dream college or poor quota/state match</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-center mt-3">
+    <a href="{% url 'predictions:predict' %}" class="btn btn-dark px-4 py-2">
+      <i class="bi bi-stars me-2"></i>Run My Prediction
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Scholarships & Financial Aid — NEETPredict AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-hero{background:linear-gradient(135deg,var(--navy),#243b55);padding:2.75rem 2rem;text-align:center}
+  .page-hero h1{font-family:var(--font-d);font-size:2rem;color:#fff;font-weight:800}
+  .page-hero p{color:rgba(255,255,255,.6);max-width:540px;margin:.5rem auto 0}
+  .sch-section{margin-bottom:2rem}
+  .sch-section h2{font-family:var(--font-d);font-size:1.25rem;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--amber)}
+  .sch-card{background:#fff;border-radius:var(--radius);box-shadow:0 2px 12px rgba(13,27,42,.07);padding:1.25rem 1.5rem;margin-bottom:1rem;border-left:4px solid var(--amber);transition:transform .15s}
+  .sch-card:hover{transform:translateX(4px)}
+  .sch-name{font-family:var(--font-d);font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:.35rem}
+  .sch-org{font-size:.78rem;color:var(--muted);margin-bottom:.5rem}
+  .sch-details{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem}
+  @media(max-width:576px){.sch-details{grid-template-columns:1fr}}
+  .sch-det{background:#f8fafc;padding:.45rem .75rem;border-radius:6px;font-size:.82rem}
+  .sch-det strong{color:var(--navy);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem}
+  .sch-link{font-size:.82rem;font-weight:600;color:var(--target)}
+  .tip-card{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fcd34d;border-radius:var(--radius);padding:1.1rem 1.4rem;margin-bottom:.75rem}
+  .tip-card h4{font-family:var(--font-d);font-size:.92rem;font-weight:700;color:#78350f;margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem}
+  .tip-card p{font-size:.85rem;color:#92400e;margin:0;line-height:1.6}
+  .cat-badge{display:inline-block;font-size:.7rem;padding:.15rem .55rem;border-radius:100px;font-weight:600;margin-right:.3rem}
+  .cat-central{background:#dbeafe;color:#1e40af}
+  .cat-state{background:#d1fae5;color:#065f46}
+  .cat-private{background:#ede9fe;color:#4c1d95}
+  .cat-merit{background:#fef3c7;color:#92400e}
+  .cat-minority{background:#fce7f3;color:#9d174d}
+  .timeline{position:relative;padding-left:2rem}
+  .timeline::before{content:'';position:absolute;left:.75rem;top:0;bottom:0;width:2px;background:var(--border)}
+  .timeline-item{position:relative;margin-bottom:1.25rem}
+  .timeline-dot{position:absolute;left:-1.6rem;top:.35rem;width:12px;height:12px;border-radius:50%;background:var(--amber);border:2px solid #fff;box-shadow:0 0 0 2px var(--amber)}
+  .timeline-item h4{font-family:var(--font-d);font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
+  .timeline-item p{font-size:.82rem;color:var(--muted);margin:0;line-height:1.5}
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="page-hero">
+  <h1><i class="bi bi-mortarboard-fill me-2"></i>Scholarships & Financial Aid</h1>
+  <p>Comprehensive guide to scholarships for MBBS students — central, state, private, and minority schemes.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── CENTRAL GOVERNMENT SCHOLARSHIPS ─── -->
+<div class="sch-section">
+  <h2><span style="color:var(--target);">🏛️</span> Central Government Scholarships</h2>
+
+  <div class="sch-card">
+    <div class="sch-name">Post Matric Scholarship for SC/ST/OBC Students</div>
+    <div class="sch-org"><span class="cat-badge cat-central">Central Govt</span> Ministry of Social Justice & Empowerment</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>SC/ST/OBC students; family income &lt; ₹2.5 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>Full tuition + maintenance allowance ₹1,200/month (hosteller)</div>
+      <div class="sch-det"><strong>How to Apply</strong>National Scholarship Portal (NSP) — scholarships.gov.in</div>
+      <div class="sch-det"><strong>Deadline</strong>Usually October-November each year</div>
+    </div>
+    <a href="https://scholarships.gov.in" target="_blank" class="sch-link"><i class="bi bi-box-arrow-up-right me-1"></i>Apply on NSP →</a>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Central Sector Scheme of Scholarship (CSSS)</div>
+    <div class="sch-org"><span class="cat-badge cat-central">Central Govt</span> Ministry of Education</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Top 20th percentile in Class 12 board exams; family income &lt; ₹8 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>₹20,000/year for professional courses (years 4-5: ₹20,000/year)</div>
+      <div class="sch-det"><strong>How to Apply</strong>National Scholarship Portal (NSP)</div>
+      <div class="sch-det"><strong>Deadline</strong>October-December each year</div>
+    </div>
+    <a href="https://scholarships.gov.in" target="_blank" class="sch-link"><i class="bi bi-box-arrow-up-right me-1"></i>Apply on NSP →</a>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Prime Minister's Scholarship Scheme (PMSS)</div>
+    <div class="sch-org"><span class="cat-badge cat-central">Central Govt</span> Ministry of Defence / Home Affairs</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Wards of ex-servicemen / CAPF / state police martyrs</div>
+      <div class="sch-det"><strong>Benefits</strong>₹3,000/month for boys, ₹3,000/month for girls (5 years)</div>
+      <div class="sch-det"><strong>How to Apply</strong>Kendriya Sainik Board Portal — ksb.gov.in</div>
+      <div class="sch-det"><strong>Deadline</strong>August-October</div>
+    </div>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Maulana Azad National Fellowship (Minorities)</div>
+    <div class="sch-org"><span class="cat-badge cat-minority">Minority</span> Ministry of Minority Affairs</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Muslim, Christian, Sikh, Buddhist, Jain, Parsi students; family income &lt; ₹6 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>Full tuition + maintenance up to ₹3,000/month</div>
+      <div class="sch-det"><strong>How to Apply</strong>National Scholarship Portal</div>
+      <div class="sch-det"><strong>Deadline</strong>September-November</div>
+    </div>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Pragati Scholarship for Girl Students</div>
+    <div class="sch-org"><span class="cat-badge cat-central">Central Govt</span> AICTE (Technical Education)</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Girl students in professional courses; family income &lt; ₹8 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>₹50,000/year (tuition waiver + ₹2,000/month incidentals)</div>
+      <div class="sch-det"><strong>How to Apply</strong>AICTE Portal — aicte-pragati.in</div>
+      <div class="sch-det"><strong>Deadline</strong>December</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MP STATE SCHOLARSHIPS ─── -->
+<div class="sch-section">
+  <h2><span style="color:var(--safe);">🏫</span> Madhya Pradesh State Scholarships</h2>
+
+  <div class="sch-card">
+    <div class="sch-name">MP Post Matric Scholarship (SC/ST/OBC)</div>
+    <div class="sch-org"><span class="cat-badge cat-state">MP State</span> Tribal Affairs / SC Welfare Department</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>SC/ST/OBC domicile of MP; family income &lt; ₹6 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>Full tuition fees + hostel/maintenance allowance</div>
+      <div class="sch-det"><strong>How to Apply</strong>MP Scholarship Portal 2.0 — scholarshipportal.mp.nic.in</div>
+      <div class="sch-det"><strong>Deadline</strong>November-January</div>
+    </div>
+    <a href="https://scholarshipportal.mp.nic.in" target="_blank" class="sch-link"><i class="bi bi-box-arrow-up-right me-1"></i>MP Scholarship Portal →</a>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Gaon Ki Beti / Pratibha Kiran Yojana</div>
+    <div class="sch-org"><span class="cat-badge cat-state">MP State</span> Higher Education Department</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Girls from rural areas (Gaon Ki Beti) / BPL urban girls (Pratibha Kiran); 60%+ in Class 12</div>
+      <div class="sch-det"><strong>Benefits</strong>₹5,000/year (10 months × ₹500/month)</div>
+      <div class="sch-det"><strong>How to Apply</strong>MP Scholarship Portal 2.0</div>
+      <div class="sch-det"><strong>Deadline</strong>Ongoing each academic session</div>
+    </div>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Vikramaditya Yojana (GEN/OBC)</div>
+    <div class="sch-org"><span class="cat-badge cat-state">MP State</span> Higher Education Department</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>General/OBC students from MP; 60%+ in Class 12; family income &lt; ₹5.4 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>Full tuition fee reimbursement at government colleges</div>
+      <div class="sch-det"><strong>How to Apply</strong>MP Scholarship Portal 2.0</div>
+      <div class="sch-det"><strong>Deadline</strong>As per academic calendar</div>
+    </div>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Mukhyamantri Medhavi Vidyarthi Yojana (MMVY)</div>
+    <div class="sch-org"><span class="cat-badge cat-state">MP State</span> Technical Education Department</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>MP domicile; scored 70%+ (CBSE/ICSE) or 75%+ (MP Board) in Class 12; family income &lt; ₹6 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>Full tuition fee reimbursement (govt & private colleges)</div>
+      <div class="sch-det"><strong>How to Apply</strong>MMVY Portal — scholarshipportal.mp.nic.in</div>
+      <div class="sch-det"><strong>Deadline</strong>July-September</div>
+    </div>
+    <a href="https://scholarshipportal.mp.nic.in" target="_blank" class="sch-link"><i class="bi bi-box-arrow-up-right me-1"></i>Apply on MMVY Portal →</a>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Mukhyamantri Jan Kalyan Yojana (Sambal)</div>
+    <div class="sch-org"><span class="cat-badge cat-state">MP State</span> Labour Department</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Children of unorganised workers registered under Sambal scheme in MP</div>
+      <div class="sch-det"><strong>Benefits</strong>Full course fees for professional education (MBBS/engineering)</div>
+      <div class="sch-det"><strong>How to Apply</strong>Sambal Portal — sambal.mp.gov.in</div>
+      <div class="sch-det"><strong>Deadline</strong>As per admission schedule</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MERIT / INSTITUTIONAL SCHOLARSHIPS ─── -->
+<div class="sch-section">
+  <h2><span style="color:var(--dream);">🏆</span> Merit & Institutional Scholarships</h2>
+
+  <div class="sch-card">
+    <div class="sch-name">AIIMS Fee Waiver (Income-based)</div>
+    <div class="sch-org"><span class="cat-badge cat-merit">Merit/Need</span> All AIIMS Institutions</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Students admitted to any AIIMS; family income &lt; ₹6 lakh/year</div>
+      <div class="sch-det"><strong>Benefits</strong>Complete fee waiver (AIIMS fees are already ₹1,628/year)</div>
+      <div class="sch-det"><strong>How to Apply</strong>At the time of AIIMS admission — automatic for qualifying students</div>
+      <div class="sch-det"><strong>Special</strong>SC/ST students get additional book allowance</div>
+    </div>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">JIPMER Merit Scholarship</div>
+    <div class="sch-org"><span class="cat-badge cat-merit">Merit/Need</span> JIPMER Puducherry</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Top NEET rankers admitted to JIPMER</div>
+      <div class="sch-det"><strong>Benefits</strong>Annual merit scholarship + fee exemption for economically weaker students</div>
+      <div class="sch-det"><strong>How to Apply</strong>Through JIPMER admission office</div>
+      <div class="sch-det"><strong>Special</strong>JIPMER annual fee is only ₹5,950/year</div>
+    </div>
+  </div>
+
+  <div class="sch-card">
+    <div class="sch-name">Private College Merit Scholarships</div>
+    <div class="sch-org"><span class="cat-badge cat-private">Private</span> Various Private Medical Colleges</div>
+    <div class="sch-details">
+      <div class="sch-det"><strong>Eligibility</strong>Top NEET rankers (typically AIR &lt; 10,000 for top private colleges)</div>
+      <div class="sch-det"><strong>Benefits</strong>25-100% tuition waiver depending on rank and college</div>
+      <div class="sch-det"><strong>Examples</strong>Manipal, CMC Vellore, St. John's, Amrita, KMC all offer merit scholarships</div>
+      <div class="sch-det"><strong>How to Apply</strong>Check individual college admission portals during counselling</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TIPS & GUIDANCE ─── -->
+<div class="sch-section">
+  <h2><span>💡</span> Tips & Application Guidance</h2>
+
+  <div class="tip-card">
+    <h4>📋 Apply on NSP Early</h4>
+    <p>Most central government scholarships are processed through <strong>scholarships.gov.in</strong>. Create your NSP account as soon as you get your NEET result. The portal opens in September-October and closes by December. Late applications are NOT accepted.</p>
+  </div>
+
+  <div class="tip-card">
+    <h4>📄 Keep Documents Ready</h4>
+    <p>You'll need: Aadhaar card, bank passbook (in student's name with IFSC), caste certificate, income certificate, domicile certificate, Class 12 marksheet, NEET scorecard, college admission letter. Get these <strong>before</strong> the portal opens.</p>
+  </div>
+
+  <div class="tip-card">
+    <h4>🔗 Apply to Multiple Schemes</h4>
+    <p>You can apply for <strong>both central and state</strong> scholarships simultaneously. Many students miss state-level schemes. If you're from MP, check Vikramaditya, MMVY, Gaon Ki Beti, AND the NSP central schemes — you may qualify for more than one.</p>
+  </div>
+
+  <div class="tip-card">
+    <h4>💰 Education Loans as Backup</h4>
+    <p>All nationalized banks offer education loans for MBBS at 8-10% interest. <strong>Vidya Lakshmi Portal</strong> (vidyalakshmi.co.in) lets you apply to multiple banks at once. Loans up to ₹7.5 lakh require no collateral. Central government's <strong>interest subsidy scheme</strong> covers interest during moratorium for EWS students.</p>
+  </div>
+
+  <div class="tip-card">
+    <h4>🏥 Government Colleges = Low Fees</h4>
+    <p>Annual fees at government medical colleges range from <strong>₹5,000 to ₹60,000/year</strong> — extremely affordable. AIIMS charges only ₹1,628/year. Focus on securing a government college seat through NEET, and your total 5.5-year MBBS cost can be under ₹3 lakh.</p>
+  </div>
+
+  <div class="tip-card">
+    <h4>⏰ Application Timeline</h4>
+    <div class="timeline mt-3">
+      <div class="timeline-item"><div class="timeline-dot"></div><h4>May-June</h4><p>NEET exam → Collect all documents (income, caste, domicile certificates)</p></div>
+      <div class="timeline-item"><div class="timeline-dot"></div><h4>July-August</h4><p>NEET results → Start counselling → Get admission letter from college</p></div>
+      <div class="timeline-item"><div class="timeline-dot"></div><h4>September-October</h4><p>NSP portal opens → Apply for central scholarships immediately</p></div>
+      <div class="timeline-item"><div class="timeline-dot"></div><h4>October-November</h4><p>State scholarship portals open → Apply for state-specific schemes</p></div>
+      <div class="timeline-item"><div class="timeline-dot"></div><h4>November-January</h4><p>Submit verified applications → Track status on portals → Follow up with college</p></div>
+      <div class="timeline-item"><div class="timeline-dot"></div><h4>February-March</h4><p>Scholarship disbursement begins → Check bank account → Renew for next year</p></div>
+    </div>
+  </div>
+</div>
+
+<div style="background:#f8fafc;border-radius:var(--radius);padding:1.25rem 1.5rem;border:1px solid var(--border);text-align:center;font-size:.82rem;color:var(--muted);">
+  <i class="bi bi-info-circle me-1"></i>
+  Scholarship details are compiled from official government sources. Always verify eligibility and deadlines on the official portals before applying.
+  Amounts and criteria may change each academic year.
+</div>
+
+{% endblock %}

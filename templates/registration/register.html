@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Register — NEETPredict AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-hero { background:linear-gradient(135deg,var(--navy),#243b55); padding:3rem 2rem 4rem; text-align:center; }
+  .auth-hero h1 { font-family:var(--font-d); font-size:1.9rem; color:#fff; font-weight:800; }
+  .auth-hero p  { color:rgba(255,255,255,.6); font-size:.9rem; margin:.4rem auto 0; }
+  .auth-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:2rem; max-width:580px; margin:-2rem auto 0; position:relative; z-index:2; }
+  .auth-card h2 { font-family:var(--font-d); font-size:1.25rem; font-weight:700; margin-bottom:1.25rem; color:var(--navy); }
+  .btn-auth { background:var(--navy); color:#fff; font-family:var(--font-d); font-weight:700; border:none; border-radius:8px; padding:.75rem; width:100%; font-size:.95rem; cursor:pointer; transition:background .2s; }
+  .btn-auth:hover { background:var(--navy-soft); }
+  .form-control, .form-select { border-radius:8px; border-color:var(--border); font-size:.9rem; }
+  .form-control:focus, .form-select:focus { border-color:var(--amber); box-shadow:0 0 0 3px rgba(245,158,11,.15); }
+  .section-lbl { font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--amber); margin-bottom:.5rem; padding-top:.25rem; }
+  .divider { display:flex; align-items:center; gap:.75rem; margin:1rem 0; color:var(--muted); font-size:.8rem; }
+  .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="auth-hero">
+  <h1>Create Your Account</h1>
+  <p>Join to save predictions and track your counselling journey.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h2><i class="bi bi-person-plus me-2 text-warning"></i>Sign Up</h2>
+
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger py-2" style="font-size:.85rem;">{{ form.non_field_errors.0 }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="section-lbl">Personal Details</div>
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">First Name</label>
+        {{ form.first_name }}
+        {% if form.first_name.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.first_name.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="col-6">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">Last Name</label>
+        {{ form.last_name }}
+      </div>
+      <div class="col-12">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">Email Address</label>
+        {{ form.email }}
+        {% if form.email.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.email.errors.0 }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="section-lbl">NEET Details <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;">(optional — used to pre-fill predictions)</span></div>
+    <div class="row g-2 mb-3">
+      <div class="col-md-4">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">Category</label>
+        {{ form.category }}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">Home State</label>
+        {{ form.state_of_domicile }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">NEET Rank</label>
+        {{ form.neet_rank }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">Score</label>
+        {{ form.neet_score }}
+      </div>
+    </div>
+
+    <div class="section-lbl">Password</div>
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.password.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="col-6">
+        <label class="form-label" style="font-size:.82rem;font-weight:500;">Confirm Password</label>
+        {{ form.confirm_password }}
+        {% if form.confirm_password.errors %}<div class="text-danger mt-1" style="font-size:.75rem;">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn-auth">
+      <i class="bi bi-person-check me-2"></i>Create Account & Start Predicting
+    </button>
+  </form>
+
+  <div class="divider">or</div>
+  <div class="text-center" style="font-size:.875rem;color:var(--muted);">
+    Already have an account? <a href="{% url 'accounts-web:login' %}" style="color:var(--navy);font-weight:600;">Sign in</a>
+  </div>
+</div>
+{% endblock %}

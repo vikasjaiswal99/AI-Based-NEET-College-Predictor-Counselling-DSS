@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Compare Colleges — NEETPredict AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-hero { background:linear-gradient(135deg,var(--navy),#243b55); padding:2.75rem 2rem; text-align:center; }
+  .page-hero h1 { font-family:var(--font-d); font-size:2rem; color:#fff; font-weight:800; }
+  .page-hero p  { color:rgba(255,255,255,.6); max-width:500px; margin:.5rem auto 0; }
+  .picker-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:1.25rem 1.5rem; margin-top:-1.5rem; position:relative; z-index:2; margin-bottom:1.5rem; }
+  .compare-grid { display:grid; gap:1.25rem; }
+  .compare-grid.cols-2 { grid-template-columns:1fr 1fr; }
+  .compare-grid.cols-3 { grid-template-columns:1fr 1fr 1fr; }
+  @media(max-width:768px) { .compare-grid.cols-2,.compare-grid.cols-3 { grid-template-columns:1fr; } }
+  .cmp-card { background:#fff; border-radius:var(--radius); box-shadow:0 2px 12px rgba(13,27,42,.07); overflow:hidden; border-top:4px solid var(--amber); }
+  .cmp-header { background:var(--navy); padding:1.2rem 1.4rem; }
+  .cmp-name { font-family:var(--font-d); font-size:1.05rem; font-weight:700; color:#fff; }
+  .cmp-loc { font-size:.78rem; color:rgba(255,255,255,.5); margin-top:.2rem; }
+  .cmp-body { padding:1rem 1.4rem; }
+  .cmp-row { display:flex; justify-content:space-between; align-items:center; padding:.55rem 0; border-bottom:1px solid #f3f4f6; }
+  .cmp-row:last-child { border-bottom:none; }
+  .cmp-label { font-size:.8rem; color:var(--muted); font-weight:500; }
+  .cmp-value { font-family:var(--font-d); font-size:.9rem; font-weight:700; color:var(--navy); }
+  .cmp-chip { display:inline-flex; align-items:center; gap:.25rem; font-size:.72rem; padding:.2rem .6rem; border-radius:100px; font-weight:600; }
+  .chip-govt { background:#d1fae5; color:#065f46; }
+  .chip-central { background:#dbeafe; color:#1e40af; }
+  .chip-private { background:#ede9fe; color:#4c1d95; }
+  .chip-deemed { background:#fef3c7; color:#92400e; }
+  .trend-badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.82rem; font-weight:600; }
+  .empty-compare { text-align:center; padding:3rem; color:var(--muted); }
+  .empty-compare .icon { font-size:2.5rem; margin-bottom:.5rem; }
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="page-hero">
+  <h1><i class="bi bi-columns-gap me-2"></i>Compare Colleges</h1>
+  <p>Select 2-3 colleges to compare side by side — fees, cutoffs, seats, and trends.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="picker-card">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-12 col-md-4">
+      <label class="form-label" style="font-size:.82rem;">College 1</label>
+      <select name="c" class="form-select">
+        <option value="">Select a college...</option>
+        {% for name in available %}
+        <option value="{{ name }}" {% if name in selected %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label" style="font-size:.82rem;">College 2</label>
+      <select name="c" class="form-select">
+        <option value="">Select a college...</option>
+        {% for name in available %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3">
+      <label class="form-label" style="font-size:.82rem;">College 3 (optional)</label>
+      <select name="c" class="form-select">
+        <option value="">— None —</option>
+        {% for name in available %}
+        <option value="{{ name }}">{{ name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-1">
+      <button type="submit" class="btn btn-dark w-100"><i class="bi bi-arrows-angle-expand"></i></button>
+    </div>
+  </form>
+</div>
+
+{% if colleges %}
+<div class="compare-grid cols-{{ colleges|length }}">
+  {% for c in colleges %}
+  <div class="cmp-card">
+    <div class="cmp-header">
+      <div class="cmp-name">{{ c.name }}</div>
+      <div class="cmp-loc"><i class="bi bi-geo-alt-fill"></i> {{ c.city }}, {{ c.state }}</div>
+    </div>
+    <div class="cmp-body">
+      <div class="cmp-row">
+        <span class="cmp-label">Type</span>
+        <span class="cmp-chip chip-{{ c.college_type|lower }}">{{ c.college_type }}</span>
+      </div>
+      <div class="cmp-row">
+        <span class="cmp-label">Annual Fee</span>
+        <span class="cmp-value">{{ c.annual_fee }}</span>
+      </div>
+      <div class="cmp-row">
+        <span class="cmp-label">MBBS Seats</span>
+        <span class="cmp-value">{{ c.mbbs_seats }}</span>
+      </div>
+      <div class="cmp-row">
+        <span class="cmp-label">GEN Closing Rank</span>
+        <span class="cmp-value">#{{ c.gen_closing_rank }}</span>
+      </div>
+      {% if c.nmc_ranking %}
+      <div class="cmp-row">
+        <span class="cmp-label">NMC Ranking</span>
+        <span class="cmp-value" style="color:var(--amber);">#{{ c.nmc_ranking }}</span>
+      </div>
+      {% endif %}
+      <div class="cmp-row">
+        <span class="cmp-label">Cutoff Trend</span>
+        <span class="trend-badge">{{ c.trend_icon }} {{ c.trend }}</span>
+      </div>
+      <div class="cmp-row">
+        <span class="cmp-label">Data Year</span>
+        <span class="cmp-value">{{ c.year }}</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-compare">
+  <div class="icon">⚖️</div>
+  <h3 style="font-family:var(--font-d);">Select colleges above to compare</h3>
+  <p>Choose 2-3 colleges from the dropdowns and click the compare button.</p>
+</div>
+{% endif %}
+{% endblock %}

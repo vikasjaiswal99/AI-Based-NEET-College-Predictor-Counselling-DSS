@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}College Explorer — NEETPredict AI{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-hero { background:linear-gradient(135deg,var(--navy),#243b55); padding:2.75rem 2rem; text-align:center; }
+  .page-hero h1 { font-family:var(--font-d); font-size:2rem; color:#fff; font-weight:800; }
+  .page-hero p  { color:rgba(255,255,255,.6); max-width:500px; margin:.5rem auto 0; }
+  .search-box { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); padding:1.25rem 1.5rem; margin-top:-1.5rem; position:relative; z-index:2; margin-bottom:1.5rem; }
+  .college-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; }
+  .cg-card { background:#fff; border-radius:var(--radius); box-shadow:0 2px 10px rgba(13,27,42,.06); padding:1.2rem 1.4rem; transition:transform .2s,box-shadow .2s; border-left:4px solid var(--amber); }
+  .cg-card:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(13,27,42,.12); }
+  .cg-name { font-family:var(--font-d); font-size:.95rem; font-weight:700; color:var(--navy); margin-bottom:.25rem; }
+  .cg-loc { font-size:.78rem; color:var(--muted); margin-bottom:.5rem; }
+  .cg-chips { display:flex; flex-wrap:wrap; gap:.3rem; }
+  .cg-chip { font-size:.72rem; padding:.15rem .5rem; border-radius:100px; background:#f3f4f6; color:var(--navy-soft); }
+  .cg-chip.type-govt { background:#d1fae5; color:#065f46; }
+  .cg-chip.type-central { background:#dbeafe; color:#1e40af; }
+  .cg-chip.type-private { background:#ede9fe; color:#4c1d95; }
+  .cg-chip.type-deemed { background:#fef3c7; color:#92400e; }
+  .cg-chip.ranked { background:rgba(245,158,11,.15); color:#92400e; font-weight:600; }
+  .total-badge { background:var(--amber); color:var(--navy); font-family:var(--font-d); font-weight:800; font-size:.85rem; padding:.3rem .9rem; border-radius:100px; }
+</style>
+{% endblock %}
+
+{% block hero %}
+<div class="page-hero">
+  <h1><i class="bi bi-building me-2"></i>College Explorer</h1>
+  <p>Browse all {{ total }} medical colleges in our database. Search, filter, and find the perfect fit.</p>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="search-box">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-12 col-md-4">
+      <label class="form-label" style="font-size:.82rem;"><i class="bi bi-search me-1"></i>Search</label>
+      <input type="text" name="q" class="form-control" placeholder="College name or city..." value="{{ query }}">
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label" style="font-size:.82rem;"><i class="bi bi-geo-alt me-1"></i>State</label>
+      <select name="state" class="form-select">
+        <option value="">All States</option>
+        {% for val, label in states %}
+        <option value="{{ val }}" {% if state_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label" style="font-size:.82rem;"><i class="bi bi-building me-1"></i>Type</label>
+      <select name="type" class="form-select">
+        <option value="">All Types</option>
+        {% for t in types %}
+        <option value="{{ t }}" {% if type_filter == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-2">
+      <button type="submit" class="btn btn-dark w-100"><i class="bi bi-filter me-1"></i>Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <span class="total-badge">{{ total }} Colleges</span>
+</div>
+
+<div class="college-grid">
+{% for c in colleges %}
+  <div class="cg-card">
+    <div class="cg-name">{{ c.name }}</div>
+    <div class="cg-loc"><i class="bi bi-geo-alt-fill"></i> {{ c.city }}, {{ c.state }}</div>
+    <div class="cg-chips">
+      <span class="cg-chip type-{{ c.college_type|lower }}">{{ c.college_type }}</span>
+      <span class="cg-chip"><i class="bi bi-currency-rupee"></i>{{ c.annual_fee }}/yr</span>
+      {% if c.mbbs_seats %}<span class="cg-chip"><i class="bi bi-people-fill"></i>{{ c.mbbs_seats }} seats</span>{% endif %}
+      {% if c.nmc_ranking %}<span class="cg-chip ranked"><i class="bi bi-star-fill"></i> NMC #{{ c.nmc_ranking }}</span>{% endif %}
+    </div>
+  </div>
+{% empty %}
+  <div class="empty-state" style="grid-column:1/-1;">
+    <div style="font-size:2.5rem;">🔍</div>
+    <h3>No colleges found</h3>
+    <p>Try adjusting your search or filters.</p>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}
